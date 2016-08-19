@@ -29,7 +29,32 @@ namespace xxstory
                 this.value = value;
             }
         }
+        public static string GetSubName<T>(GameObject child, GameObject root) where T : Component
+        {
+            if (child == null || root == null)
+            {
+                Debug.LogWarning("StoryUIMapping GetSubName child or root is null");
+                return string.Empty;
+            }
+            string subName = child.name;
+            Transform parentTrans = child.transform.parent;
 
+            while (parentTrans != null)
+            {
+                if (parentTrans == root.transform)
+                    break;
+                var hstjtype = parentTrans.gameObject.GetComponent<T>();
+                if (!(hstjtype is T))
+                {
+                    parentTrans.gameObject.AddComponent<T>();
+                }
+                subName = parentTrans.gameObject.name + "." + subName;
+                parentTrans = parentTrans.parent;
+            }
+            if (parentTrans == null)
+                return string.Empty;
+            return subName;
+        }
         public class singlePanelInfo
         {
             public GameObject panelRoot;
@@ -47,19 +72,7 @@ namespace xxstory
 
             public string GetSubName(GameObject objChild)
             {
-                string subName = objChild.name;
-                Transform parentTrans = objChild.transform.parent;
-
-                while (parentTrans != null)
-                {
-                    if (parentTrans == panelRoot.transform)
-                        break;
-                    subName = parentTrans.gameObject.name + "." + subName;
-                    parentTrans = parentTrans.parent;
-                }
-                if (parentTrans == null)
-                    return string.Empty;
-                return subName;
+                return StoryUIMapping.GetSubName<Hstj.HUIWidget>(objChild, panelRoot);
             }
 
             public bool AddSingle(string refName, string signName)
@@ -220,7 +233,7 @@ namespace xxstory
                 data.AddJoson(writer);
             }
             writer.WriteObjectEnd();
-
+            
             string savePath = Application.streamingAssetsPath + preDir + "jsonUIMap/" + saveName + ".json";
             string exePath = Application.streamingAssetsPath + preDir + "jsonTools/ui_json2lua.py";
             StreamWriter sw = new StreamWriter(savePath);
@@ -247,6 +260,7 @@ namespace xxstory
                 string text = sr.ReadToEnd();
 
                 JsonData panelMap = JsonMapper.ToObject(text);
+                panelMap.ToJson();
                 foreach (string panelName in (panelMap as IDictionary).Keys)
                 {
                     GameObject obj = GameObject.Find(panelName);
