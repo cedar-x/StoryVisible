@@ -224,7 +224,7 @@ namespace LitJson
             Put (String.Empty);
 
             writer.Write ('"');
-            /*
+
             int n = str.Length;
             for (int i = 0; i < n; i++) {
                 switch (str[i]) {
@@ -265,8 +265,7 @@ namespace LitJson
                 writer.Write ("\\u");
                 writer.Write (hex_seq);
             }
-            */
-            writer.Write(str);
+
             writer.Write ('"');
         }
 
