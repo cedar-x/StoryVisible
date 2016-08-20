@@ -16,28 +16,28 @@ public class UIReflectionWindow : EditorWindow
         int slength = Selection.objects.Length;
         for (int i = 0; i < slength; i++)
         {
-            foreach (var childLbl in (Selection.objects[i] as GameObject).GetComponentsInChildren<UILabel>())
-            {
-                SetLabelParam(childLbl);
-            }
+//             foreach (var childLbl in (Selection.objects[i] as GameObject).GetComponentsInChildren<UILabel>())
+//             {
+//                 SetLabelParam(childLbl);
+//             }
         }
         Debug.Log("Flush Hierarchy Label successed:count:" + slength);
     }
     [MenuItem("Story Export/UI Transition/Flush Project Label")]
     private static void OnFlushProjectLabel()
     {
-        foreach (Object o in Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets))
-        {
-            if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab)
-            {
-                UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
-                foreach (var childlbl in childlbls)
-                {
-                    SetLabelParam(childlbl);
-                }
-                Debug.Log("Flush Project Labe:" + AssetDatabase.GetAssetPath(o));
-            }
-        }
+//         foreach (Object o in Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets))
+//         {
+//             if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab)
+//             {
+//                 UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
+//                 foreach (var childlbl in childlbls)
+//                 {
+//                     SetLabelParam(childlbl);
+//                 }
+//                 Debug.Log("Flush Project Labe:" + AssetDatabase.GetAssetPath(o));
+//             }
+//            
     }
     [MenuItem("Story Export/UI Transition/Flush Project Button")]
     private static void OnFlushProjectButton()
@@ -46,11 +46,11 @@ public class UIReflectionWindow : EditorWindow
         {
             if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab)
             {
-                UIButtonScale[] childs = GetComponentsInChildrenOfAsset<UIButtonScale>(o as GameObject);
-                foreach (var child in childs)
-                {
-                    SetButtonParam(child);
-                }
+//                 UIButtonScale[] childs = GetComponentsInChildrenOfAsset<UIButtonScale>(o as GameObject);
+//                 foreach (var child in childs)
+//                 {
+//                     SetButtonParam(child);
+//                 }
                 Debug.Log("Flush Project Button:" + AssetDatabase.GetAssetPath(o));
             }
         }
@@ -62,10 +62,10 @@ public class UIReflectionWindow : EditorWindow
         int slength = Selection.gameObjects.Length;
         for (int i = 0; i < slength; i++)
         {
-            foreach (var childLbl in Selection.gameObjects[i].GetComponentsInChildren<UILabel>())
-            {
-                AttachLabel(childLbl.gameObject);
-            }
+//             foreach (var childLbl in Selection.gameObjects[i].GetComponentsInChildren<UILabel>())
+//             {
+//                 AttachLabel(childLbl.gameObject);
+//             }
         }
         Debug.Log("Attach Hierarchy Label successed:count:" + slength);
     }
@@ -76,11 +76,11 @@ public class UIReflectionWindow : EditorWindow
         {
             if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab)
             {
-                UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
-                foreach (var childlbl in childlbls)
-                {
-                    AttachLabel(childlbl.gameObject);
-                }
+//                 UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
+//                 foreach (var childlbl in childlbls)
+//                 {
+//                     AttachLabel(childlbl.gameObject);
+//                 }
                 Debug.Log("Attach Hierarchy Label:" + AssetDatabase.GetAssetPath(o));
             }
         }
@@ -96,20 +96,20 @@ public class UIReflectionWindow : EditorWindow
         int index = 0;
         string sfName = oRoot.name;
         sb.Append("UIReflectMapping.localStringConfig['" + sfName + "']={\n");
-        foreach (var childLbl in oRoot.GetComponentsInChildren<UILabel>())
-        {
-            AttachLabel(childLbl.gameObject);
-            string subName = StoryUIMapping.GetSubName<Hstj.HUIWidget>(childLbl.gameObject, oRoot);
-            if (!checkstr.Contains(subName))
-            {
-                checkstr.Add(subName);
-            }else{
-                Debug.LogWarning("Two GameObject can't be the same name:" + subName);
-            }
-            string non = childLbl.text.Replace("\n", "\\n");
-            sb.Append(string.Format("\t{0}={{\n\t\tname = '{1}',\n\t\ttext = 'text_{2}',\n\t}},\n", "label" + index,subName, non.Replace("\r", "")));
-            ++index;
-        }
+//         foreach (var childLbl in oRoot.GetComponentsInChildren<UILabel>())
+//         {
+//             AttachLabel(childLbl.gameObject);
+//             string subName = StoryUIMapping.GetSubName<Hstj.HUIWidget>(childLbl.gameObject, oRoot);
+//             if (!checkstr.Contains(subName))
+//             {
+//                 checkstr.Add(subName);
+//             }else{
+//                 Debug.LogWarning("Two GameObject can't be the same name:" + subName);
+//             }
+//             string non = childLbl.text.Replace("\n", "\\n");
+//             sb.Append(string.Format("\t{0}={{\n\t\tname = '{1}',\n\t\ttext = 'text_{2}',\n\t}},\n", "label" + index,subName, non.Replace("\r", "")));
+//             ++index;
+//         }
         sb.Append("}");
         ExportFile(sfName, sb.ToString());
         Debug.Log("Export Hierarchy Local String successed:" + sfName);
@@ -121,45 +121,45 @@ public class UIReflectionWindow : EditorWindow
         System.Text.StringBuilder sbInclude = new System.Text.StringBuilder("_G.UIReflectMapping.localStringConfig = {}\n");
         foreach (Object o in Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets))
         {
-            if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab && (o as GameObject).GetComponent<Hstj.HUIRoot>())
-            {
-                UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                int index = 0;
-                List<string> checkstr = new List<string>();
-                string assetPath = AssetDatabase.GetAssetPath(o);
-                string folderPath = assetPath.Substring(0, assetPath.LastIndexOf('/'));
-                folderPath = folderPath.Substring(folderPath.IndexOf("UI/") + 3);
-                string sfName = o.name;
-                if (folderPath != o.name)
-                    sfName = folderPath + "/" + o.name;
-                sbInclude .Append("dofile \"Config/UIReflectConfig/UILocalString/"+o.name+".lua\"\n");
-                sb.Append("UIReflectMapping.localStringConfig['" + sfName + "']={\n");
-                foreach (var childlbl in childlbls)
-                {
-                    string subName = StoryUIMapping.GetSubName<Hstj.HUIWidget>(childlbl.gameObject, (o as GameObject));
-                    if (!AttachLabel(childlbl.gameObject))
-                    {
-                        Debug.LogWarning("Export Project Label AttachLabel failed:" +o.name+":"+ subName);
-                    }
-                    if (string.IsNullOrEmpty(childlbl.text) || childlbl.gameObject.activeSelf == false)
-                        continue;
-                    if (!checkstr.Contains(subName))
-                    {
-                        checkstr.Add(subName);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Two GameObject can't be the same name:" +o.name+":"+ subName);
-                    }
-                    string non = childlbl.text.Replace("\n", "\\n");
-                    sb.Append(string.Format("\t{0}={{\n\t\tname = '{1}',\n\t\ttext = 'text_{2}',\n\t}},\n", "label" + index, subName, non.Replace("\r", "")));
-                    ++index;
-                }
-                sb.Append("}");
-                ExportFile(o.name, sb.ToString());
-                //Debug.Log("Export Project Local String:" + AssetDatabase.GetAssetPath(o));
-            }
+//             if (PrefabUtility.GetPrefabType(o) == PrefabType.Prefab && (o as GameObject).GetComponent<Hstj.HUIRoot>())
+//             {
+//                 UILabel[] childlbls = GetComponentsInChildrenOfAsset<UILabel>(o as GameObject);
+//                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
+//                 int index = 0;
+//                 List<string> checkstr = new List<string>();
+//                 string assetPath = AssetDatabase.GetAssetPath(o);
+//                 string folderPath = assetPath.Substring(0, assetPath.LastIndexOf('/'));
+//                 folderPath = folderPath.Substring(folderPath.IndexOf("UI/") + 3);
+//                 string sfName = o.name;
+//                 if (folderPath != o.name)
+//                     sfName = folderPath + "/" + o.name;
+//                 sbInclude .Append("dofile \"Config/UIReflectConfig/UILocalString/"+o.name+".lua\"\n");
+//                 sb.Append("UIReflectMapping.localStringConfig['" + sfName + "']={\n");
+//                 foreach (var childlbl in childlbls)
+//                 {
+//                     string subName = StoryUIMapping.GetSubName<Hstj.HUIWidget>(childlbl.gameObject, (o as GameObject));
+//                     if (!AttachLabel(childlbl.gameObject))
+//                     {
+//                         Debug.LogWarning("Export Project Label AttachLabel failed:" +o.name+":"+ subName);
+//                     }
+//                     if (string.IsNullOrEmpty(childlbl.text) || childlbl.gameObject.activeSelf == false)
+//                         continue;
+//                     if (!checkstr.Contains(subName))
+//                     {
+//                         checkstr.Add(subName);
+//                     }
+//                     else
+//                     {
+//                         Debug.LogWarning("Two GameObject can't be the same name:" +o.name+":"+ subName);
+//                     }
+//                     string non = childlbl.text.Replace("\n", "\\n");
+//                     sb.Append(string.Format("\t{0}={{\n\t\tname = '{1}',\n\t\ttext = 'text_{2}',\n\t}},\n", "label" + index, subName, non.Replace("\r", "")));
+//                     ++index;
+//                 }
+//                 sb.Append("}");
+//                 ExportFile(o.name, sb.ToString());
+//                //Debug.Log("Export Project Local String:" + AssetDatabase.GetAssetPath(o));
+//           }
         }
         string exportFolder = AssetDatabase.GetAssetPath(Selection.activeObject);
         Debug.Log("Export Project Local String:" + exportFolder);
@@ -214,35 +214,35 @@ public class UIReflectionWindow : EditorWindow
         }
         return true;
     }
-    private static void SetLabelParam(UILabel objcom)
-    {
-        if (objcom == null) return;
-        objcom.effectStyle = UILabel.Effect.Shadow;
-        objcom.effectColor = new Color(0, 0, 0, 1);
-        objcom.effectDistance = new Vector2(1f, 1f);
-        objcom.spacingX = 1;
-        objcom.spacingY = 0;
-    }
-    private static void SetButtonParam(UIButtonScale objcom)
-    {
-        if (objcom == null) return;
-        objcom.hover = Vector3.one;
-        objcom.pressed = new Vector3(0.95f,0.95f,0.95f);
-        objcom.duration = 0.02f;
-    }
+//     private static void SetLabelParam(UILabel objcom)
+//     {
+//         if (objcom == null) return;
+//         objcom.effectStyle = UILabel.Effect.Shadow;
+//         objcom.effectColor = new Color(0, 0, 0, 1);
+//         objcom.effectDistance = new Vector2(1f, 1f);
+//         objcom.spacingX = 1;
+//         objcom.spacingY = 0;
+//     }
+//     private static void SetButtonParam(UIButtonScale objcom)
+//     {
+//         if (objcom == null) return;
+//         objcom.hover = Vector3.one;
+//         objcom.pressed = new Vector3(0.95f,0.95f,0.95f);
+//         objcom.duration = 0.02f;
+//     }
     private static bool AttachLabel(GameObject objLbl)
     {
-        var hstjtype = objLbl.GetComponent<Hstj.HUIWidget>();
-        if (hstjtype == null)
-        {
-            objLbl.gameObject.AddComponent<Hstj.HUILabel>();
-        }
-        else if (!(hstjtype is Hstj.HUILabel))
-        {
-            Debug.LogWarning("UILabel's LuaObject is not HUILabel. please check.." + objLbl.name);
-            return false;
-        }
-        return true;
+//         var hstjtype = objLbl.GetComponent<Hstj.HUIWidget>();
+//         if (hstjtype == null)
+//         {
+//             objLbl.gameObject.AddComponent<Hstj.HUILabel>();
+//         }
+//         else if (!(hstjtype is Hstj.HUILabel))
+//         {
+//             Debug.LogWarning("UILabel's LuaObject is not HUILabel. please check.." + objLbl.name);
+//             return false;
+//         }
+         return true;
     }
     private static void ExportFile(string fileName, string content)
     {

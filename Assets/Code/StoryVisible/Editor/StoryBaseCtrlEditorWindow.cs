@@ -3,9 +3,7 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UniLua;
 using xxstory;
-using Hstj;
 
 /// <summary>
 /// 剧情事件添加界面管理接口
@@ -26,7 +24,7 @@ public class StoryBaseCtrlEditorWindow : EditorWindow
     
     //当前时间轴Ctrl和当前选中事件Ctrl
     private static StoryBaseCtrl _selectCtrl;
-    private Hstj.LuaAnimEvent _animEvent;
+    private xxstory.LuaAnimEvent _animEvent;
 
     private int _dwScriptID;
     private bool mbCameraFolderOut;
@@ -43,7 +41,7 @@ public class StoryBaseCtrlEditorWindow : EditorWindow
             return;
         }
         GameObject obj = new GameObject("New Anim Event");
-        obj.AddComponent<Hstj.LuaAnimEvent>().InitMemeber();
+        obj.AddComponent<LuaAnimEvent>().InitMemeber();
     }
     private void drawLine()
     {
@@ -137,14 +135,12 @@ public class StoryBaseCtrlEditorWindow : EditorWindow
             StoryBaseCtrl objCtrl = _selectCtrl.CopySelf();
             objCtrl.ModInfo();
             _animEvent.objEditorShotCtrl.Add(objCtrl, _insertIndex);
-            NGUITools.SetDirty(_animEvent);
             _insertIndex = -1;
         }
         if (GUILayout.Button("修改"))
         {
             if (_selectCtrl == null) return;
             _selectCtrl.ModInfo();
-            NGUITools.SetDirty(_animEvent);
         }
         if (GUILayout.Button("存储点"))
         {
@@ -177,178 +173,20 @@ public class StoryBaseCtrlEditorWindow : EditorWindow
             StoryPositionCtrl objCtrl = new StoryPositionCtrl();
             _selectCtrl = objCtrl;
         }
-        if (GUILayout.Button("走动", GUILayout.Width(btnWidth)))
-        {
-            StoryMoveCtrl objCtrl = new StoryMoveCtrl();
-            _selectCtrl = objCtrl;
-
-        }
-        if (GUILayout.Button("动作", GUILayout.Width(btnWidth)))
-        {
-            StoryAnimCtrl objCtrl = new StoryAnimCtrl();
-            _selectCtrl = objCtrl;
-
-        }
-        if (GUILayout.Button("主角组装", GUILayout.Width(btnWidth)))
-        {
-            StoryPackActorCtrl objCtrl = new StoryPackActorCtrl();
-            _selectCtrl = objCtrl;
-        }
         GUILayout.Label("界面");
         if (GUILayout.Button("对话", GUILayout.Width(btnWidth)))
         {
             StoryTalkCtrl objCtrl = new StoryTalkCtrl();
             _selectCtrl = objCtrl;
         }
-        if (GUILayout.Button("图片", GUILayout.Width(btnWidth)))
-        {
-            StoryPictureCtrl objCtrl = new StoryPictureCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("描述", GUILayout.Width(btnWidth)))
-        {
-            StoryUIDescCtrl objCtrl = new StoryUIDescCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("背景控制", GUILayout.Width(btnWidth)))
-        {
-            StoryUIBackCtrl objCtrl = new StoryUIBackCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("视频", GUILayout.Width(btnWidth)))
-        {
-            StoryVideoCtrl objCtrl = new StoryVideoCtrl();
-            _selectCtrl = objCtrl;
-        }
         
         
-//         if (GUILayout.Button("选项", GUILayout.Width(btnWidth)))
-//         {
-//             StoryOptionCtrl objCtrl = new StoryOptionCtrl();
-//             _selectCtrl = objCtrl;
-//         }
-        GUILayout.Label("效果");
-        if (GUILayout.Button("特效", GUILayout.Width(btnWidth)))
-        {
-            StoryEffectCtrl objCtrl = new StoryEffectCtrl();
-            _selectCtrl = objCtrl;
-        }
         if (GUILayout.Button("音效", GUILayout.Width(btnWidth)))
         {
             StoryMusicCtrl objCtrl = new StoryMusicCtrl();
             _selectCtrl = objCtrl;
         }
 
-        GUILayout.Label("摄像机");
-        if (GUILayout.Button("分离", GUILayout.Width(btnWidth)))
-        {
-            StorySeparateCtrl objCtrl = new StorySeparateCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("合并", GUILayout.Width(btnWidth)))
-        {
-            StoryCombineCtrl objCtrl = new StoryCombineCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("目标", GUILayout.Width(btnWidth)))
-        {
-            StoryCameraLookCtrl objCtrl = new StoryCameraLookCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("缓动", GUILayout.Width(btnWidth)))
-        {
-            StoryCameraSmoothCtrl objCtrl = new StoryCameraSmoothCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("震屏", GUILayout.Width(btnWidth)))
-        {
-            StoryCameraShakeCtrl objCtrl = new StoryCameraShakeCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("广角设置", GUILayout.Width(btnWidth)))
-        {
-            StoryCameraFovCtrl objCtrl = new StoryCameraFovCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("淡入淡出", GUILayout.Width(btnWidth)))
-        {
-            StoryTweenFadeCtrl objCtrl = new StoryTweenFadeCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("画面去色", GUILayout.Width(btnWidth)))
-        {
-            StoryGrayscaleCtrl objCtrl = new StoryGrayscaleCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("Boss展示背景", GUILayout.Width(btnWidth)))
-        {
-            StoryMontageCtrl objCtrl = new StoryMontageCtrl();
-            _selectCtrl = objCtrl;
-        }
-        GUILayout.Label("缓动变换相关");
-        if (GUILayout.Button("直线变换", GUILayout.Width(btnWidth)))
-        {
-            StoryTweenMoveCtrl objCtrl = new StoryTweenMoveCtrl();
-            _selectCtrl = objCtrl;
-        }
-        if (GUILayout.Button("旋转变换", GUILayout.Width(btnWidth)))
-        {
-            StoryTweenRotateCtrl objCtrl = new StoryTweenRotateCtrl();
-            _selectCtrl = objCtrl;
-        }
-        GUILayout.Label("时间");
-        if (GUILayout.Button("等待", GUILayout.Width(btnWidth)))
-        {
-            _selectCtrl = new StoryTimeCtrl();
-        }
     }
-    /*
-    //更新
-    void Update()
-    {
-
-    }
-
-    void OnFocus()
-    {
-        Debug.Log("当窗口获得焦点时调用一次");
-    }
-
-    void OnLostFocus()
-    {
-        Debug.Log("当窗口丢失焦点时调用一次");
-    }
-
-    void OnHierarchyChange()
-    {
-        Debug.Log("当Hierarchy视图中的任何对象发生改变时调用一次");
-    }
-
-    void OnProjectChange()
-    {
-        Debug.Log("当Project视图中的资源发生改变时调用一次");
-    }
-
-    void OnInspectorUpdate()
-    {
-        //Debug.Log("窗口面板的更新");
-        //这里开启窗口的重绘，不然窗口信息不会刷新
-        this.Repaint();
-    }
-
-    void OnSelectionChange()
-    {
-        //当窗口出去开启状态，并且在Hierarchy视图中选择某游戏对象时调用
-        foreach (Transform t in Selection.transforms)
-        {
-            //有可能是多选，这里开启一个循环打印选中游戏对象的名称
-            Debug.Log("OnSelectionChange" + t.name);
-        }
-    }
-
-    void OnDestroy()
-    {
-        Debug.Log("当窗口关闭时调用");
-    }
-     * */
+    
 }

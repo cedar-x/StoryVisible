@@ -3,16 +3,14 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using xxstory;
-using Hstj;
-using UniLua;
 
 /// <summary>
 /// Inspector 显示LuaGameCamera设置参数，方便可视化配置参数
 /// </summary>
-[CustomEditor(typeof(Hstj.LuaAnimEvent))]
+[CustomEditor(typeof(LuaAnimEvent))]
 public class LuaAnimEventEditor : Editor
 {
-    Hstj.LuaAnimEvent objAnimEvent;
+    LuaAnimEvent objAnimEvent;
     private static int dwBoardIndex;
     private static bool bActorInfoFolder = true;
     private bool bActorZJCreate = false;
@@ -26,7 +24,7 @@ public class LuaAnimEventEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        objAnimEvent = target as Hstj.LuaAnimEvent;
+        objAnimEvent = target as LuaAnimEvent;
         if (!objAnimEvent.bInitMember) return;
         //
         ImportScript(objAnimEvent);
@@ -98,7 +96,6 @@ public class LuaAnimEventEditor : Editor
     //人物信息展示
     public static void ShowActorInfo(LuaAnimEvent animEvent)
     {
-        NGUIEditorTools.SetLabelWidth(80f);
         bActorInfoFolder = EditorGUILayout.Foldout(bActorInfoFolder, "All Actor Info");
         if (bActorInfoFolder == true)
         {
@@ -181,7 +178,6 @@ public class LuaAnimEventEditor : Editor
     //人物镜头展示
     private void ShowShotsInfo(StoryBoardCtrl board, int boardIndex = 0)
     {
-        NGUIEditorTools.BeginContents(true);
         for (int i = 0; i < board.Count; ++i)
         {
             StoryShotCtrl lenCtrl = board[i];
@@ -198,7 +194,7 @@ public class LuaAnimEventEditor : Editor
             {
                 objAnimEvent.objEditorShotCtrl = lenCtrl;
             }
-            bool bFolder = NGUIEditorTools.DrawHeader(actorName, key, true, false);
+            bool bFolder = false;// NGUIEditorTools.DrawHeader(actorName, key, true, false);
             if (GUILayout.Button("<b><size=12>\u25BA</size></b> ", new GUILayoutOption[] { GUILayout.Width(minBoxWidth), GUILayout.Height(minBoxHeight) }))
             {
                 lenCtrl.Stop();
@@ -226,7 +222,6 @@ public class LuaAnimEventEditor : Editor
                 ShowEventInfo(lenCtrl);
             }
         }
-        NGUIEditorTools.EndContents();
     }
     private void ShowEventInfo(StoryShotCtrl lenCtrl)
     {

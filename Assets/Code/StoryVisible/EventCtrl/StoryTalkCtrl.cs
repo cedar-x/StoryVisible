@@ -3,8 +3,6 @@ using System.Collections;
 #if UNITY_EDITOR 
 using UnityEditor;
 #endif
-using UniLua;
-using Hstj;
 
 /// <summary>
 /// 设计目的：用于--对话类--事件的调度
@@ -55,14 +53,9 @@ namespace xxstory
         }
         public override void Execute()
         {
-            if (_realInfo.bHideNext == false)
-                LuaAnimEvent.OnBtnNextState(true);
-            ShowTalkInfo();
         }
         public override void OnFinish()
         {
-            LuaAnimEvent.OnBtnNextState(false);
-            HideTalkInfo();
         }
         public override void ModInfo()
         {
@@ -86,13 +79,10 @@ namespace xxstory
             switch (key)
             {
                 case "talkInfo":
-                    _normalInfo.talkInfo = lua.L_CheckString(-1);
                     break;
                 case "talkName":
-                    _normalInfo.talkName = lua.L_CheckString(-1);
                     break;
                 case "bHideNext":
-                    _normalInfo.bHideNext = lua.ToBoolean(-1);
                     break;
                 default:
                     return base.WidgetWriteOper(lua, key);
@@ -104,13 +94,10 @@ namespace xxstory
             switch (key)
             {
                 case "talkInfo":
-                    lua.PushString(_realInfo.talkInfo);
                     break;
                 case "talkName":
-                    lua.PushString(_realInfo.talkName);
                     break;
                 case "bHideNext":
-                    lua.PushBoolean(_realInfo.bHideNext);
                     break;
                 default:
                     return base.WidgetReadOper(lua, key);
@@ -128,15 +115,5 @@ namespace xxstory
         }
 #endif
         /// /////////////////////////////// 功能函数 ///////////////////////////////////////////////////////////////
-        public void ShowTalkInfo()
-        {
-            objStoryUI.talkName.text = _normalInfo.talkName;
-            objStoryUI.talkInfo.text = _normalInfo.talkInfo;
-        }
-        public void HideTalkInfo()
-        {
-            objStoryUI.talkName.text = "";
-            objStoryUI.talkInfo.text = "";
-        }
     }
 }

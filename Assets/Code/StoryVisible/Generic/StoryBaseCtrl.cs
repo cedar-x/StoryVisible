@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UniLua;
-using Hstj;
 
 #if UNITY_EDITOR 
     using UnityEditor;
@@ -17,10 +15,14 @@ using Hstj;
 /// 
 namespace xxstory
 {
+    public class ILuaState
+    {
+
+    }
     public class StoryBaseCtrl
     {
 
-        private static LuaGameCamera _gameCamera;
+        private static Camera _gameCamera;
 
         protected float startTime = float.MaxValue;
         public float time = 0f;
@@ -137,16 +139,12 @@ namespace xxstory
             switch (key)
             {
                 case "bWait":
-                    lua.PushBoolean(bWait);
                     break;
                 case "event":
-                    lua.PushString(luaName);
                     break;
                 case "time":
-                    lua.PushNumber(time);
                     break;
                 case "bClick":
-                    lua.PushBoolean(bClick);
                     break;
                 default:
                     return false;
@@ -155,54 +153,47 @@ namespace xxstory
         }
         protected virtual bool WidgetWriteOper(ILuaState lua, string key)
         {
-            int dwStackIndex = lua.GetTop();
             switch (key)
             {
                 case "event":
                     break;
                 case "time":
-                    time = (float)lua.L_CheckNumber(-1);
                     break;
                 case "bWait":
-                    bWait = lua.ToBoolean(-1);
                     break;
                 case "bClick":
-                    bClick = lua.ToBoolean(-1);
                     break;
                 default:
                     return false;
             }
-            if (dwStackIndex != lua.GetTop())
-                Debug.LogWarning("StoryBaseCtrl:WidgetWriteOper stack Exception:start=" + key + ":" + dwStackIndex + " end=" + lua.GetTop());
             return true;
         }
         public virtual void ExportProperty(ILuaState lua, int index)
         {
-            lua.NewTable();
             bool bSet = false;
             foreach (string key in expList)
             {
                 bSet = WidgetReadOper(lua, key);
                 if (bSet == true)
                 {
-                    lua.SetField(-2, key);
+                    //lua.SetField(-2, key);
                 }
             }
         }
         public virtual void ImportProperty(ILuaState lua, int index)
         {
-            bool bFlag = false;
-            lua.PushValue(index);
-            lua.PushNil();
-            while (lua.Next(-2))
-            {
-                string key = lua.L_CheckString(-2);
-                bFlag = WidgetWriteOper(lua, key);
-                if (bFlag == false)
-                    Debug.LogWarning(luaName + " can't write key:" + key + " please check....");
-                lua.Pop(1);
-            }
-            lua.Pop(1);
+//             bool bFlag = false;
+//             lua.PushValue(index);
+//             lua.PushNil();
+//             while (lua.Next(-2))
+//             {
+//                 string key = lua.L_CheckString(-2);
+//                 bFlag = WidgetWriteOper(lua, key);
+//                 if (bFlag == false)
+//                     Debug.LogWarning(luaName + " can't write key:" + key + " please check....");
+//                 lua.Pop(1);
+//             }
+//             lua.Pop(1);
         }
 #if UNITY_EDITOR
         public virtual void OnParamGUI()
@@ -211,53 +202,12 @@ namespace xxstory
             bWait = GUILayout.Toggle(bWait, "bWait");
             //bClick = GUILayout.Toggle(bClick, "bClick");
         }
-        public static void OnCameraInfoGUI(ref normalInfo norInfo, string expect = "", bool bCopy = true)
-        {
-            GUILayout.BeginHorizontal();
-            if (bCopy == true)
-            {
-                if (GUILayout.Button("P"))
-                {
-                    norInfo.distance = objMainCamera.distance;
-                    norInfo.offSet = objMainCamera.offset;
-                    norInfo.rotationLR = objMainCamera.LRAnge;
-                    norInfo.rotationUD = objMainCamera.UDAngle;
-                }
-            }
-            if (!expect.Contains("distance"))
-                norInfo.distance = EditorGUILayout.FloatField("视 点 距 离", norInfo.distance);
-            GUILayout.EndHorizontal();
-            if (!expect.Contains("offset"))
-                norInfo.offSet = EditorGUILayout.Vector3Field("视 点 偏 移", norInfo.offSet);
-            if (!expect.Contains("rotationUD"))
-                norInfo.rotationUD = EditorGUILayout.FloatField("仰俯 偏转角度", norInfo.rotationUD);
-            if (!expect.Contains("rotationLR"))
-                norInfo.rotationLR = EditorGUILayout.FloatField("水平 偏转角度", norInfo.rotationLR);
-
-        }
 #endif
-        public static LuaGameCamera objMainCamera
+        public static Camera objMainCamera
         {
             get
             {
-                if (_gameCamera == null)
-                {
-                    GameObject obj = null;
-                    if (Game.Instance != null)
-                    {
-                        obj = Game.Instance.GetMainCamera().gameObject;
-                    }
-                    else
-                    {
-                        obj = Camera.main.gameObject;
-                    }
-                    _gameCamera = obj.GetComponent<LuaGameCamera>();
-                }
                 return _gameCamera;
-            }
-            set
-            {
-                _gameCamera = value;
             }
         }
         public static storyUI objStoryUI

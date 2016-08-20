@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using xxstory;
-using Hstj;
 
 namespace xxstoryEditor
 {
@@ -408,14 +407,12 @@ namespace xxstoryEditor
                         _luaAnimEvent[boardIndex][actorECtrl.nameIndex - 1].Add(objCtrl, _insertIndex);
                     }
                 }
-                NGUITools.SetDirty(_luaAnimEvent);
                 _insertIndex = -1;
             }
             if (GUILayout.Button("修改"))
             {
                 if (_selectCtrl == null) return;
                 _selectCtrl.ModInfo();
-                NGUITools.SetDirty(_luaAnimEvent);
             }
             if (GUILayout.Button("存储点"))
             {
@@ -499,7 +496,7 @@ namespace xxstoryEditor
                 if (GUILayout.Button("Create Time Ctrl"))
                 {
                     GameObject obj = new GameObject("New Anim Event");
-                    obj.AddComponent<Hstj.LuaAnimEvent>().InitMemeber();
+                    obj.AddComponent<LuaAnimEvent>().InitMemeber();
                 }
             }
             else

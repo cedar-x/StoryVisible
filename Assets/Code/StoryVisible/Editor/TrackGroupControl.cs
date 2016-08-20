@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using xxstory;
-using Hstj;
 
 namespace xxstoryEditor
 {

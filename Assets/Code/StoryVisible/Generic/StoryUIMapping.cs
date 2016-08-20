@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using LitJson;
-using Hstj;
 
 namespace xxstory
 {
@@ -72,7 +71,7 @@ namespace xxstory
 
             public string GetSubName(GameObject objChild)
             {
-                return StoryUIMapping.GetSubName<Hstj.HUIWidget>(objChild, panelRoot);
+                return StoryUIMapping.GetSubName<Transform>(objChild, panelRoot);
             }
 
             public bool AddSingle(string refName, string signName)
@@ -136,23 +135,23 @@ namespace xxstory
             public void AddAllText()
             {
 
-                foreach (var pChild in panelRoot.GetComponentsInChildren<UILabel>())
-                {
-                    string refName = this.GetSubName(pChild.gameObject);
-                    var hstjtype = pChild.GetComponent<HUIWidget>();
-                    if (hstjtype == null)
-                    {
-                        pChild.gameObject.AddComponent<HUILabel>();
-                    }
-                    else
-                        if (!(hstjtype is HUILabel))
-                        {
-                            Debug.LogWarning("UILabel's LuaObject is not HUILabel. please check.." + refName);
-                        }
-                    string name = pChild.name;
-                    if (this.AddSingle(refName, name))
-                        this.AddFunction(refName, "text", pChild.text);
-                }
+//                 foreach (var pChild in panelRoot.GetComponentsInChildren<UILabel>())
+//                 {
+//                     string refName = this.GetSubName(pChild.gameObject);
+//                     var hstjtype = pChild.GetComponent<HUIWidget>();
+//                     if (hstjtype == null)
+//                     {
+//                         pChild.gameObject.AddComponent<HUILabel>();
+//                     }
+//                     else
+//                         if (!(hstjtype is HUILabel))
+//                         {
+//                             Debug.LogWarning("UILabel's LuaObject is not HUILabel. please check.." + refName);
+//                         }
+//                     string name = pChild.name;
+//                     if (this.AddSingle(refName, name))
+//                         this.AddFunction(refName, "text", pChild.text);
+//                 }
             }
             public bool CheckSignName()
             {

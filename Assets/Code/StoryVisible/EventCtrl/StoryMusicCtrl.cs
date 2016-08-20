@@ -3,8 +3,6 @@ using System.Collections;
 #if UNITY_EDITOR 
 using UnityEditor;
 #endif
-using UniLua;
-using Hstj;
 
 /// <summary>
 /// 设计目的：用于--音效类--事件的调度
@@ -25,7 +23,7 @@ namespace xxstory
         private paramInfo _saveInfo;
         private paramInfo _realInfo;
         private paramInfo _normalInfo;
-        private AudioObject _objMusic;
+
         /// ////////////////功能重写部分-必须实现部分/////////////////////////////////////////////
         public override string luaName
         {
@@ -54,21 +52,11 @@ namespace xxstory
         }
         public override void Execute()
         {
-            if (_objMusic != null)
-            {
-                AudioManager.DestroyAudio(_objMusic);
-            }
-//             _objMusic = AudioManager.PlaySound(_realInfo.musicName, 0, 0, 0, 0);
-//             _objMusic.SetLoop(_realInfo.bLoop);
-            _objMusic = AudioManager.CreateAudio("Audio/"+_realInfo.musicName, _realInfo.bLoop);
-            _objMusic.SetVolume(_realInfo.volume);
+
         }
         public override void OnFinish()
         {
-            if (_objMusic !=null)
-            {
-                AudioManager.DestroyAudio(_objMusic);
-            }
+
         }
         public override void OnForceNext()
         {
@@ -96,13 +84,11 @@ namespace xxstory
             switch (key)
             {
                 case "musicName":
-                    _normalInfo.musicName = lua.L_CheckString(-1);
+
                     break;
                 case "volume":
-                    _normalInfo.volume = (float)lua.L_CheckNumber(-1);
                     break;
                 case "bLoop":
-                    _normalInfo.bLoop = lua.ToBoolean(-1);
                     break;
                 default:
                     return base.WidgetWriteOper(lua, key);
@@ -114,13 +100,10 @@ namespace xxstory
             switch (key)
             {
                 case "musicName":
-                    lua.PushString(_realInfo.musicName);
                     break;
                 case "volume":
-                    lua.PushNumber(_realInfo.volume);
                     break;
                 case "bLoop":
-                    lua.PushBoolean(_realInfo.bLoop);
                     break;
                 default:
                     return base.WidgetReadOper(lua, key);

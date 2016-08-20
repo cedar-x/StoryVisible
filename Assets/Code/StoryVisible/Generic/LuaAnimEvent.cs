@@ -3,12 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
-using UniLua;
-using xxstory;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
-
 
 /// <summary>
 /// 设计目的：剧情时间轴实例、可以挂载各种事件
@@ -16,7 +11,7 @@ using UnityEditor;
 /// 作者：
 /// </summary>
 
-namespace Hstj
+namespace xxstory
 {
     public class storyActorInfo
     {
@@ -51,17 +46,17 @@ namespace Hstj
     }
     public class storyUI
     {
-        public UILabel talkName;
-        public UILabel talkInfo;
+        public GameObject talkName;
+        public GameObject talkInfo;
         public GameObject backGround;
         public GameObject shangBack;
         public GameObject xiaBack;
         public GameObject btnClose;
-        public UIButton btnNext;
+        public GameObject btnNext;
     }
         
 
-    public class LuaAnimEvent : LuaExport
+    public class LuaAnimEvent:MonoBehaviour
     {
         //时间周期管理-即分镜管理
         public List<StoryBoardCtrl> _storyBoard;
@@ -94,30 +89,6 @@ namespace Hstj
         public static void InitStoryUI()
         {
             if (_storyUI != null) return;
-            ILuaState lua = Game.LuaApi;
-            lua.GetGlobal("StoryInitUI");
-            if (lua.PCall(0, 0, 0) != 0)
-            {
-                Debug.LogWarning(lua.ToString(-1));
-                lua.Pop(-1);
-            }  
-            if (_storyUI == null)
-            {
-                _storyUI = new storyUI();
-                _storyUI.talkName = GameObject.Find("szStoryName").GetComponent<UILabel>();
-                _storyUI.talkInfo = GameObject.Find("szStoryTalkInfo").GetComponent<UILabel>();
-                _storyUI.backGround = GameObject.Find("storyBkGround");
-                _storyUI.btnNext = GameObject.Find("btnStoryNext").GetComponent<UIButton>();
-                _storyUI.btnClose = GameObject.Find("btnStoryClose");
-                _storyUI.shangBack= GameObject.Find("bkStoryShangBk");
-                _storyUI.xiaBack = GameObject.Find("bkStoryXiaBk");
-            }
-            lua.GetGlobal("StoryResetUI");
-            if (lua.PCall(0, 0, 0) != 0)
-            {
-                Debug.LogWarning(lua.ToString(-1));
-                lua.Pop(-1);
-            }  
         }
 
         private void onBtnAnimNext()
@@ -153,7 +124,7 @@ namespace Hstj
             AddEmpty();
             mbInitMember = true;
             InitStoryUI();
-            EventDelegate.Add(AnimStoryUI.btnNext.onClick, onBtnAnimNext);
+            //EventDelegate.Add(AnimStoryUI.btnNext.onClick, onBtnAnimNext);
         }
 
         public float totalTime
@@ -192,11 +163,12 @@ namespace Hstj
             }
         }
 
-        public Scene storyScene
+        public StorySceneCtrl storyScene
         {
             get
             {
-                return Game.Instance.GetStoryScene();
+                //return Game.Instance.GetStoryScene();
+                return null;
             }
         }
 
@@ -266,80 +238,17 @@ namespace Hstj
         {
             string actorName = "Actor" + nameIndex;
             int dwID = actorName.GetHashCode();
-            //ResManager.UseActorConfig("story");
-            //Actor objActor = Game.Instance.GetStoryScene().CreateActor("M_BaiYinJiaBing", dwID);
-            //ResManager.CreateActor("M_BaiYinJiaBing", objActor);
-            //ResManager.UseActorConfig("default");
-            ILuaState lua = Game.LuaApi;
-            lua.GetGlobal("StoryCreateActor");
-            lua.PushInteger(dwID);
-            lua.PushInteger(dwModelID);
-            if (lua.PCall(2, 2, 0) != 0)
-            {
-                Debug.LogWarning(lua.ToString(-1));
-                lua.Pop(-1);
-                return;
-            }
-            Actor objActor = GetLuaObject(lua, -2) as Actor;
-            string skeleton = lua.L_CheckString(-1);
-            if (objActor == null)
-            {
-                return;
-            }
-            objActor.SetLayer(9);
+            StoryEntity objActor = StorySceneCtrl.Instance().CreateActor("", dwModelID);
             storyActorInfo clsActor = new storyActorInfo();
-            clsActor.skeleton = skeleton;
+            clsActor.skeleton = "";
             clsActor.target = objActor.gameObject;
             clsActor.dwModelId = dwModelID;
             clsActor.nameIndex = nameIndex;
             clsActor.name = gameName;
             clsActor.type = dwType;
             clsActor.bFolderOut = false;
-            //InitActor(ref clsActor);
             objActor.name = actorName;
             _storyActor.Add(clsActor);
-            lua.Pop(2);
-        }
-
-        public void InitActor(ref storyActorInfo storyActor)
-        {
-            int dwModelId = storyActor.dwModelId;
-            Actor actor = storyActor.target.GetComponent<Actor>();
-            if (dwModelId == 1)
-            {
-                //actor.SetMeshPart("head", "Actor/ZJ_jianxia/ZJ_jianxia_07");
-                actor.SetMeshPart("body", "Actor/ZJ_jianxia/ZJ_jianxia_07");
-                actor.SetMeshPart("weapon", "Actor/ZJ_jianxia/ZJ_jianxia_wq_07");
-                storyActor.type = 1;
-                actor.GetAnimator().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            }
-            else if (dwModelId == 2)
-            {
-                //actor.SetMeshPart("head", "Actor/ZJ_jingang/ZJ_jingang_07");
-                actor.SetMeshPart("body", "Actor/ZJ_jingang/ZJ_jingang_07");
-                actor.SetMeshPart("weapon", "Actor/ZJ_jingang/ZJ_jingang_wq_07");
-                storyActor.type = 1;
-                actor.GetAnimator().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            }
-            else if (dwModelId == 3)
-            {
-                //actor.SetMeshPart("head", "Actor/ZJ_lingnv/ZJ_lingnv_07");
-                actor.SetMeshPart("body", "Actor/ZJ_lingnv/ZJ_lingnv_07");
-                storyActor.type = 1;
-                actor.GetAnimator().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            }
-            else if (dwModelId == 4)
-            {
-                //actor.SetMeshPart("head", "Actor/ZJ_luocha/ZJ_luocha_07");
-                actor.SetMeshPart("body", "Actor/ZJ_luocha/ZJ_luocha_07");
-                actor.SetMeshPart("weapon", "Actor/ZJ_luocha/ZJ_luocha_wq_07");
-                storyActor.type = 1;
-                actor.GetAnimator().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            }
-
-            actor.Visible = true;
-
-
         }
 
         public void DeleteActor(storyActorInfo actor)
@@ -358,9 +267,8 @@ namespace Hstj
         {
             string name = "Actor1";
             int dwID = name.GetHashCode();
-            Entity entity = Game.Instance.GetStoryScene().CreateEmptyObject(dwID);
+            StoryEntity entity = StorySceneCtrl.Instance().CreateEntity("");
             entity.name = name;
-            entity.SetLayer(9);
             storyActorInfo objEmpty = new storyActorInfo();
             objEmpty.target = entity.gameObject;
             objEmpty.dwModelId = 0;
@@ -435,65 +343,65 @@ namespace Hstj
 
         public void ImportBasicInfo(int dwIndex)
         {
-            ILuaState lua = _fileLua;
-            lua.PushValue(dwIndex);
-            lua.PushString("szStageName");
-            lua.GetTable(-2);
-            _storyBasicInfo.szStageName = lua.L_CheckString(-1);
-            lua.Pop(1);
-
-            lua.PushString("szPathName");
-            lua.GetTable(-2);
-            if (lua.Type(-1) == LuaType.LUA_TSTRING)
-                _storyBasicInfo.szPathName = lua.L_CheckString(-1);
-            lua.Pop(1);
-
-            lua.PushString("bNewSceneState");
-            lua.GetTable(-2);
-            _storyBasicInfo.bNewSceneState = lua.ToBoolean(-1);
-            lua.Pop(1);
-
-            lua.PushString("bNewLightState");
-            lua.GetTable(-2);
-            _storyBasicInfo.bNewLightState = lua.ToBoolean(-1);
-            lua.Pop(1);
-
-            lua.PushString("dwNextTime");
-            lua.GetTable(-2);
-            if (lua.Type(-1) ==LuaType.LUA_TNUMBER)
-                _storyBasicInfo.dwNextTime = (float)lua.L_CheckNumber(-1);
-            lua.Pop(1);
-
-            lua.PushString("dwType");
-            lua.GetTable(-2);
-            _storyBasicInfo.dwType = lua.L_CheckInteger(-1);
-            lua.Pop(1);
-
-            lua.PushString("szSceneName");
-            lua.GetTable(-2);
-            if (lua.Type(-1) == LuaType.LUA_TSTRING)
-                _storyBasicInfo.szSceneName = lua.L_CheckString(-1);
-            lua.Pop(1);
-
-            lua.PushString("OnBeforeInitStory");
-            lua.GetTable(-2);
-            if (lua.Type(-1) == LuaType.LUA_TSTRING)
-                _storyBasicInfo.OnBeforeInitStory = lua.L_CheckString(-1).Replace(";", ";\n");
-            lua.Pop(1);
-
-            lua.PushString("OnAfterInitStory");
-            lua.GetTable(-2);
-            if (lua.Type(-1) == LuaType.LUA_TSTRING)
-                _storyBasicInfo.OnAfterInitStory = lua.L_CheckString(-1).Replace(";", ";\n");
-            lua.Pop(1);
-
-            lua.PushString("OnBeforeEndStory");
-            lua.GetTable(-2);
-            if (lua.Type(-1) == LuaType.LUA_TSTRING)
-                _storyBasicInfo.OnBeforeEndStory = lua.L_CheckString(-1).Replace(";", ";\n");
-            lua.Pop(1);
-
-            lua.Pop(1);
+//             ILuaState lua = _fileLua;
+//             lua.PushValue(dwIndex);
+//             lua.PushString("szStageName");
+//             lua.GetTable(-2);
+//             _storyBasicInfo.szStageName = lua.L_CheckString(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("szPathName");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) == LuaType.LUA_TSTRING)
+//                 _storyBasicInfo.szPathName = lua.L_CheckString(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("bNewSceneState");
+//             lua.GetTable(-2);
+//             _storyBasicInfo.bNewSceneState = lua.ToBoolean(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("bNewLightState");
+//             lua.GetTable(-2);
+//             _storyBasicInfo.bNewLightState = lua.ToBoolean(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("dwNextTime");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) ==LuaType.LUA_TNUMBER)
+//                 _storyBasicInfo.dwNextTime = (float)lua.L_CheckNumber(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("dwType");
+//             lua.GetTable(-2);
+//             _storyBasicInfo.dwType = lua.L_CheckInteger(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("szSceneName");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) == LuaType.LUA_TSTRING)
+//                 _storyBasicInfo.szSceneName = lua.L_CheckString(-1);
+//             lua.Pop(1);
+// 
+//             lua.PushString("OnBeforeInitStory");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) == LuaType.LUA_TSTRING)
+//                 _storyBasicInfo.OnBeforeInitStory = lua.L_CheckString(-1).Replace(";", ";\n");
+//             lua.Pop(1);
+// 
+//             lua.PushString("OnAfterInitStory");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) == LuaType.LUA_TSTRING)
+//                 _storyBasicInfo.OnAfterInitStory = lua.L_CheckString(-1).Replace(";", ";\n");
+//             lua.Pop(1);
+// 
+//             lua.PushString("OnBeforeEndStory");
+//             lua.GetTable(-2);
+//             if (lua.Type(-1) == LuaType.LUA_TSTRING)
+//                 _storyBasicInfo.OnBeforeEndStory = lua.L_CheckString(-1).Replace(";", ";\n");
+//             lua.Pop(1);
+// 
+//             lua.Pop(1);
         }
 
         public string ExportActorInfo()
@@ -512,59 +420,59 @@ namespace Hstj
 
         public void ImportActorInfo(int dwIndex)
         {
-            _storyActor.Clear();
-            ILuaState lua = _fileLua;
-            lua.PushValue(dwIndex);
-            int len = _fileLua.L_Len(-1);
-            for (int i = 1; i <= len; i++)
-            {
-                lua.PushNumber(i);
-                lua.GetTable(-2);
-                lua.PushString("dwType");
-                lua.GetTable(-2);
-                int dwType = lua.L_CheckInteger(-1);
-                lua.Pop(1);
-                lua.PushString("dwModelID");
-                lua.GetTable(-2);
-                int dwModelID = lua.L_CheckInteger(-1);
-                lua.Pop(1);
-                lua.PushString("szRoleName");
-                lua.GetTable(-2);
-                string szRoleName = lua.L_CheckString(-1);
-                lua.Pop(1);
-                if (dwType == 3)
-                {
-                    AddEmpty();
-                }
-                else// if (dwType == 0)
-                {
-                    AddActor(dwModelID, i, dwType, szRoleName);
-                }
-                _fileLua.Pop(1);
-            }
-            _fileLua.Pop(1);
+//             _storyActor.Clear();
+//             ILuaState lua = _fileLua;
+//             lua.PushValue(dwIndex);
+//             int len = _fileLua.L_Len(-1);
+//             for (int i = 1; i <= len; i++)
+//             {
+//                 lua.PushNumber(i);
+//                 lua.GetTable(-2);
+//                 lua.PushString("dwType");
+//                 lua.GetTable(-2);
+//                 int dwType = lua.L_CheckInteger(-1);
+//                 lua.Pop(1);
+//                 lua.PushString("dwModelID");
+//                 lua.GetTable(-2);
+//                 int dwModelID = lua.L_CheckInteger(-1);
+//                 lua.Pop(1);
+//                 lua.PushString("szRoleName");
+//                 lua.GetTable(-2);
+//                 string szRoleName = lua.L_CheckString(-1);
+//                 lua.Pop(1);
+//                 if (dwType == 3)
+//                 {
+//                     AddEmpty();
+//                 }
+//                 else// if (dwType == 0)
+//                 {
+//                     AddActor(dwModelID, i, dwType, szRoleName);
+//                 }
+//                 _fileLua.Pop(1);
+//             }
+//             _fileLua.Pop(1);
         }
 
-        public override void ImportProperty(int dwIndex)
+        public  void ImportProperty(int dwIndex)
         {
-            _storyBoard.Clear();
-            ILuaState lua = _fileLua;
-            lua.PushValue(dwIndex);
-            int len = lua.L_Len(-1);
-            for (int i = 1; i <= len; i++)
-            {
-                _fileLua.PushNumber(i);
-                _fileLua.GetTable(-2);
-                StoryBoardCtrl board = new StoryBoardCtrl();
-                InitStoryBoard(board);
-                board.ImportProperty(lua, -1);
-                _fileLua.Pop(1);
-                AddBoard(board);
-            }
-            _fileLua.Pop(1);
-       }
+//             _storyBoard.Clear();
+//             ILuaState lua = _fileLua;
+//             lua.PushValue(dwIndex);
+//             int len = lua.L_Len(-1);
+//             for (int i = 1; i <= len; i++)
+//             {
+//                 _fileLua.PushNumber(i);
+//                 _fileLua.GetTable(-2);
+//                 StoryBoardCtrl board = new StoryBoardCtrl();
+//                 InitStoryBoard(board);
+//                 board.ImportProperty(lua, -1);
+//                 _fileLua.Pop(1);
+//                 AddBoard(board);
+//             }
+//             _fileLua.Pop(1)
+        }
 
-        public override string ExportProperty(string[] strProperty)
+        public string ExportProperty(string[] strProperty)
         {
             if (Count == 0)
             {
@@ -579,18 +487,6 @@ namespace Hstj
             }
             return strResult;
 
-
-            //             _fileLua.NewTable();
-            //             for (int i = 0; i < _listCtrl.Count; i++)
-            //             {
-            //                 _fileLua.PushNumber(i + 1);
-            //                 StoryBaseCtrl objCtrl = _listCtrl[i];
-            //                 objCtrl.ExportProperty(_fileLua, -1);
-            //                 _fileLua.SetTable(-3);
-            //             }
-            //             string strResult = SerializeTable(-1);
-            //             _fileLua.Pop(1);
-            //             return strResult;
         }
 
         void Update()
@@ -607,8 +503,6 @@ namespace Hstj
             {
                 if (Time.time - startTime > durtime)
                 {
-//                     if (OnNextStep())
-//                         Execute();
                     this.onBtnAnimNext();
                 }
             }
@@ -621,67 +515,67 @@ namespace Hstj
 
         public static void OnImportFromLua(LuaAnimEvent animEvent)
         {
-            ILuaState LuaApi = animEvent._fileLua;
-
-            LuaApi.GetGlobal("StoryBasicInfoImport");
-            if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
-            {
-                Debug.LogWarning("not found StoryBasicInfoImport function in lua script.");
-                LuaApi.Pop(1);
-                return;
-            }
-            if (LuaApi.PCall(0, 1, 0) != 0)
-            {
-                Debug.LogWarning(LuaApi.ToString(-1));
-                LuaApi.Pop(1);
-            }
-            if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
-            {
-                Debug.LogWarning("importLua failed, there is no event....");
-                return;
-            }
-            animEvent.ImportBasicInfo(-1);
-            LuaApi.Pop(1);
-
-            LuaApi.GetGlobal("StoryAllActorImport");
-            if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
-            {
-                Debug.LogWarning("not found StoryAllActorImport function in lua script.");
-                LuaApi.Pop(1);
-                return;
-            }
-            if (LuaApi.PCall(0, 1, 0) != 0)
-            {
-                Debug.LogWarning(LuaApi.ToString(-1));
-                LuaApi.Pop(1);
-            }
-            if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
-            {
-                Debug.LogWarning("importLua failed, there is no event....");
-                return;
-            }
-            animEvent.ImportActorInfo(-1);
-            LuaApi.Pop(1);
-
-            LuaApi.GetGlobal("StoryAllEventImport");
-            if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
-            {
-                Debug.LogWarning("not found StoryAllEventImport function in lua script.");
-                LuaApi.Pop(1);
-                return;
-            }
-            if (LuaApi.PCall(0, 1, 0) != 0)
-            {
-                Debug.LogWarning(LuaApi.ToString(-1));
-                LuaApi.Pop(1);
-            }
-            if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
-            {
-                Debug.LogWarning("importLua failed, there is no event....");
-                return;
-            }
-            animEvent.ImportProperty(-1);
-            LuaApi.Pop(1);
+//             ILuaState LuaApi = animEvent._fileLua;
+// 
+//             LuaApi.GetGlobal("StoryBasicInfoImport");
+//             if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
+//             {
+//                 Debug.LogWarning("not found StoryBasicInfoImport function in lua script.");
+//                 LuaApi.Pop(1);
+//                 return;
+//             }
+//             if (LuaApi.PCall(0, 1, 0) != 0)
+//             {
+//                 Debug.LogWarning(LuaApi.ToString(-1));
+//                 LuaApi.Pop(1);
+//             }
+//             if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
+//             {
+//                 Debug.LogWarning("importLua failed, there is no event....");
+//                 return;
+//             }
+//             animEvent.ImportBasicInfo(-1);
+//             LuaApi.Pop(1);
+// 
+//             LuaApi.GetGlobal("StoryAllActorImport");
+//             if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
+//             {
+//                 Debug.LogWarning("not found StoryAllActorImport function in lua script.");
+//                 LuaApi.Pop(1);
+//                 return;
+//             }
+//             if (LuaApi.PCall(0, 1, 0) != 0)
+//             {
+//                 Debug.LogWarning(LuaApi.ToString(-1));
+//                 LuaApi.Pop(1);
+//             }
+//             if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
+//             {
+//                 Debug.LogWarning("importLua failed, there is no event....");
+//                 return;
+//             }
+//             animEvent.ImportActorInfo(-1);
+//             LuaApi.Pop(1);
+// 
+//             LuaApi.GetGlobal("StoryAllEventImport");
+//             if (LuaApi.Type(-1) != LuaType.LUA_TFUNCTION)
+//             {
+//                 Debug.LogWarning("not found StoryAllEventImport function in lua script.");
+//                 LuaApi.Pop(1);
+//                 return;
+//             }
+//             if (LuaApi.PCall(0, 1, 0) != 0)
+//             {
+//                 Debug.LogWarning(LuaApi.ToString(-1));
+//                 LuaApi.Pop(1);
+//             }
+//             if (LuaApi.Type(-1) == LuaType.LUA_TNIL)
+//             {
+//                 Debug.LogWarning("importLua failed, there is no event....");
+//                 return;
+//             }
+//             animEvent.ImportProperty(-1);
+//             LuaApi.Pop(1);
         }
 
 
@@ -716,6 +610,7 @@ namespace Hstj
         }
 
 #if UNITY_EDITOR
+
           public static void ExportToScriptFile(LuaAnimEvent animEvent, int scriptID)
         {
             string scriptString = string.Format("local StoryConfig = {{\n{0}\n{1}\n{2}\n{3}\n{4}\n}}\n{5}",
@@ -746,66 +641,6 @@ namespace Hstj
         private static bool mbCameraFolderOut;
         public static void CameraSetting(LuaAnimEvent animEvent)
         {
-            if (animEvent == null) return;
-            GUILayout.Label(animEvent.gameObject.name);
-            LuaGameCamera objCamera = StoryBaseCtrl.objMainCamera;
-            mbCameraFolderOut = EditorGUILayout.Foldout(mbCameraFolderOut, "摄像机参数实时设置:(目标:" + ((objCamera.target != null) ? objCamera.target.name : "nil") + ")");
-            if (mbCameraFolderOut)
-            {
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("特写镜头"))
-                {
-                    objCamera.distance = 5;
-                    objCamera.offset = new Vector3(0f, 0.6f, 0f);
-                    objCamera.UDAngle = 45;
-                    objCamera.LRAnge = 0;
-                    objCamera.calculatePos(false);
-                }
-                if (GUILayout.Button("中景镜头"))
-                {
-                    objCamera.distance = 5;
-                    objCamera.offset = new Vector3(0f, 1f, 0f);
-                    objCamera.UDAngle = 0;
-                    objCamera.LRAnge = 0;
-                    objCamera.calculatePos(false);
-                }
-                if (GUILayout.Button("远景镜头"))
-                {
-                    objCamera.distance = 10.5f;
-                    objCamera.offset = new Vector3(0f, 0.6f, 0f);
-                    objCamera.UDAngle = 45;
-                    objCamera.LRAnge = 0;
-                    objCamera.calculatePos(false);
-                }
-                if (GUILayout.Button("游戏镜头"))
-                {
-                    objCamera.distance = 10.5f;
-                    objCamera.offset = new Vector3(0f, 0.6f, 0f);
-                    objCamera.UDAngle = 30;
-                    objCamera.LRAnge = 0;
-                    objCamera.calculatePos(false);
-                }
-                GUILayout.EndHorizontal();
-                float distance = EditorGUILayout.FloatField("视 点 距 离", objCamera.distance);
-                objCamera.offset = EditorGUILayout.Vector3Field("视 点 偏 移", objCamera.offset);
-                float UDAngle = EditorGUILayout.FloatField("仰俯 偏转角度", objCamera.UDAngle);
-                float LRAngle = EditorGUILayout.FloatField("水平 偏转角度", objCamera.LRAnge);
-                if (objCamera.distance != distance)
-                {
-                    objCamera.distance = distance;
-                    objCamera.calculatePos(false);
-                }
-                if (objCamera.LRAnge != LRAngle)
-                {
-                    objCamera.LRAnge = LRAngle;
-                    objCamera.calculatePos(false);
-                }
-                if (objCamera.UDAngle != UDAngle)
-                {
-                    objCamera.UDAngle = UDAngle;
-                    objCamera.calculatePos(false);
-                }
-            }
         }
 
         private static bool bOnInitBeforeInit;

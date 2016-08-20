@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Hstj;
-using UniLua;
 
 namespace xxstory
 {
@@ -127,16 +125,16 @@ namespace xxstory
         }
         public void ImportProperty(ILuaState lua, int index)
         {
-            lua.PushValue(index);
-            lua.PushNil();
-            while(lua.Next(-2))
-            {
-                int key = lua.L_CheckInteger(-2);
-                StoryShotCtrl shotctrl = _shots[key-1];
-                shotctrl.ImportProperty(lua, -1);
-                lua.Pop(1);
-            }
-            lua.Pop(1);
+//             lua.PushValue(index);
+//             lua.PushNil();
+//             while(lua.Next(-2))
+//             {
+//                 int key = lua.L_CheckInteger(-2);
+//                 StoryShotCtrl shotctrl = _shots[key-1];
+//                shotctrl.ImportProperty(lua, -1);
+//                lua.Pop(1);
+//             }
+//             lua.Pop(1);
         }
         public string ExportProperty(string[] strProperty)
         {

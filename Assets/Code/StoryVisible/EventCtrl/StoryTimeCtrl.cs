@@ -3,8 +3,6 @@ using System.Collections;
 #if UNITY_EDITOR 
 using UnityEditor;
 #endif
-using UniLua;
-using Hstj;
 
 
 /// <summary>
@@ -43,12 +41,5 @@ namespace xxstory
             obj.time = time;
             return obj;
         }
-#if UNITY_EDITOR 
-        public override void OnParamGUI()
-        {
-            time = EditorGUILayout.FloatField("time", time);
-            GUILayout.Toggle(true, "bWait");
-        }
-#endif
     }
 }

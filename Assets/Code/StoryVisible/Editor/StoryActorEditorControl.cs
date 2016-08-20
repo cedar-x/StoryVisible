@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using xxstory;
-using Hstj;
 
 namespace xxstoryEditor
 {

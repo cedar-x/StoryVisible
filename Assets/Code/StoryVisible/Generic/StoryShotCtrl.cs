@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Hstj;
-using UniLua;
 
 namespace xxstory
 {
@@ -222,131 +220,89 @@ namespace xxstory
         {
             switch (key)
             {
-                case "StoryAnimCtrl":
-                    return new StoryAnimCtrl();
-                case "StoryCameraLookCtrl":
-                    return new StoryCameraLookCtrl();
-                case "StoryCameraSmoothCtrl":
-                    return new StoryCameraSmoothCtrl();
-                case "StoryCombinCtrl":
-                    return new StoryCombineCtrl();
-                case "StroyEffectCtrl":
-                    return new StoryEffectCtrl();
-                case "StoryEndCtrl":
-                    return new StoryEndCtrl();
-                case "StoryGrayscaleCtrl":
-                    return new StoryGrayscaleCtrl();
-                case "StoryMontageCtrl":
-                    return new StoryMontageCtrl();
-                case "StoryMoveCtrl":
-                    return new StoryMoveCtrl();
-                case "StoryOptionCtrl":
-                    return new StoryOptionCtrl();
-                case "StoryPictureCtrl":
-                    return new StoryPictureCtrl();
                 case "StoryPositionCtrl":
                     return new StoryPositionCtrl();
-                case "StorySeparateCtrl":
-                    return new StorySeparateCtrl();
                 case "StoryTalkCtrl":
                     return new StoryTalkCtrl();
                 case "StoryTimeCtrl":
                     return new StoryTimeCtrl();
-                case "StoryTweenFadeCtrl":
-                    return new StoryTweenFadeCtrl();
-                case "StoryTweenMoveCtrl":
-                    return new StoryTweenMoveCtrl();
-                case "StoryTweenRotateCtrl":
-                    return new StoryTweenRotateCtrl();
-                case "StoryUIDescCtrl":
-                    return new StoryUIDescCtrl();
-                case "StoryCameraShakeCtrl":
-                    return new StoryCameraShakeCtrl();
-                case "StoryMusicCtrl":
-                    return new StoryMusicCtrl();
-                case "StoryCameraFovCtrl":
-                    return new StoryCameraFovCtrl();
-                case "StoryUIBackCtrl":
-                    return new StoryUIBackCtrl();
-                case "StoryPackActorCtrl":
-                    return new StoryPackActorCtrl();
-                case "StoryVideoCtrl":
-                    return new StoryVideoCtrl();
             }
             Debug.Log("there is no EventCtrl:" + key);
             return null;
         }
         public void ImportProperty(ILuaState lua, int dwIndex)
         {
-            _listCtrl.Clear();
-            lua.PushValue(dwIndex);
-            int len = lua.L_Len(-1);
-            for (int i = 1; i <= len; i++)
-            {
-                lua.PushNumber(i);
-                lua.GetTable(-2);
-                lua.PushString("event");
-                lua.GetTable(-2);
-                string eventName = lua.L_CheckString(-1);
-                lua.Pop(1);
-                StoryBaseCtrl objCtrl = InstanceEventCtrl(eventName);
-                if (objCtrl != null)
-                {
-                    objCtrl.ImportProperty(lua, -1);
-                    objCtrl.ModInfo();
-                }
-                else
-                {
-                    Debug.LogWarning("InstanceEventCtrl objCtrl is null " + eventName);
-                }
-                lua.Pop(1);
-                Add(objCtrl);
-            }
-            lua.Pop(1);
+//             _listCtrl.Clear();
+//             lua.PushValue(dwIndex);
+//             int len = lua.L_Len(-1);
+//             for (int i = 1; i <= len; i++)
+//             {
+//                 lua.PushNumber(i);
+//                 lua.GetTable(-2);
+//                 lua.PushString("event");
+//                 lua.GetTable(-2);
+//                 string eventName = lua.L_CheckString(-1);
+//                 lua.Pop(1);
+//                 StoryBaseCtrl objCtrl = InstanceEventCtrl(eventName);
+//                 if (objCtrl != null)
+//                 {
+//                     objCtrl.ImportProperty(lua, -1);
+//                     objCtrl.ModInfo();
+//                 }
+//                 else
+//                 {
+//                     Debug.LogWarning("InstanceEventCtrl objCtrl is null " + eventName);
+//                 }
+//                 lua.Pop(1);
+//                 Add(objCtrl);
+//             }
+//             lua.Pop(1);
         }
         public string ExportProperty(string[] strProperty)
         {
-            ILuaState _fileLua = Game.LuaApi;
-            _fileLua.NewTable();
-            for (int i = 0; i < _listCtrl.Count; i++)
-            {
-                _fileLua.PushNumber(i + 1);
-                StoryBaseCtrl objCtrl = _listCtrl[i];
-                objCtrl.ExportProperty(_fileLua, -1);
-                _fileLua.SetTable(-3);
-            }
-            string strResult = SerializeTable(_fileLua, -1);
-            _fileLua.Pop(1);
-            return strResult;
+//             ILuaState _fileLua = Game.LuaApi;
+//             _fileLua.NewTable();
+//             for (int i = 0; i < _listCtrl.Count; i++)
+//             {
+//                 _fileLua.PushNumber(i + 1);
+//                 StoryBaseCtrl objCtrl = _listCtrl[i];
+//                 objCtrl.ExportProperty(_fileLua, -1);
+//                 _fileLua.SetTable(-3);
+//             }
+//             string strResult = SerializeTable(_fileLua, -1);
+//             _fileLua.Pop(1);
+//             return strResul   
+            return "";
         }
         /// <summary>
         /// 将Table序列化成为字符串写入文件
         /// </summary>
         public string SerializeTable(ILuaState _fileLua, int index)
         {
-            //获取LibCore中_SerializeTable函数，然后串行化table， 以后要重写，从而不依赖LibCore（因为有在非运行状态下获取内容）
-            if (_fileLua.Type(index) != LuaType.LUA_TTABLE)
-            {
-                Debug.LogWarning("LuaExport:SerializeTable param must a table.. please check");
-                return "";
-            }
-            int dwStackIndex = _fileLua.GetTop();
-            _fileLua.PushValue(index);
-            _fileLua.GetGlobal("_SerializeTable");
-            _fileLua.Insert(-2);
-            _fileLua.PushBoolean(false);
-            if (_fileLua.PCall(2, 1, 0) != 0)
-            {
-                Debug.LogWarning(_fileLua.ToString(-1) + " in SerializeTable");
-                _fileLua.Pop(-1);
-                return "";
-            }
-            string szResult = _fileLua.ToString(-1);
-            //Debug.Log(m_szResult);
-            _fileLua.Pop(1);
-            if (dwStackIndex != _fileLua.GetTop())
-                Debug.LogWarning("LuaExport:SerializeTable stack Exception:start=" + dwStackIndex + " end=" + _fileLua.GetTop());
-            return szResult;
+//             //获取LibCore中_SerializeTable函数，然后串行化table， 以后要重写，从而不依赖LibCore（因为有在非运行状态下获取内容）
+//             if (_fileLua.Type(index) != LuaType.LUA_TTABLE)
+//             {
+//                 Debug.LogWarning("LuaExport:SerializeTable param must a table.. please check");
+//                 return "";
+//             }
+//             int dwStackIndex = _fileLua.GetTop();
+//             _fileLua.PushValue(index);
+//             _fileLua.GetGlobal("_SerializeTable");
+//             _fileLua.Insert(-2);
+//             _fileLua.PushBoolean(false);
+//             if (_fileLua.PCall(2, 1, 0) != 0)
+//             {
+//                 Debug.LogWarning(_fileLua.ToString(-1) + " in SerializeTable");
+//                 _fileLua.Pop(-1);
+//                 return "";
+//             }
+//             string szResult = _fileLua.ToString(-1);
+//             //Debug.Log(m_szResult);
+//             _fileLua.Pop(1);
+//             if (dwStackIndex != _fileLua.GetTop())
+//                 Debug.LogWarning("LuaExport:SerializeTable stack Exception:start=" + dwStackIndex + " end=" + _fileLua.GetTop());
+//             return szResult;
+            return "";
         }
     }
 }

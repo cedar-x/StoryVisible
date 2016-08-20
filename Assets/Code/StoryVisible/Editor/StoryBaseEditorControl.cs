@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEditor;
 using xxstory;
-using Hstj;
 
 namespace xxstoryEditor
 {
