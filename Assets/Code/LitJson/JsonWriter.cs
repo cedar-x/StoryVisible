@@ -76,6 +76,40 @@ namespace LitJson
             get { return validate; }
             set { validate = value; }
         }
+        protected virtual string ArrayStartFlag
+        {
+            get
+            {
+                return "[";
+            }
+        }
+        protected virtual string ArrayEndFlag
+        {
+            get
+            {
+                return "]";
+            }
+        }
+        protected virtual string PropertyFlag
+        {
+            get{
+                return ":";
+            }
+        }
+        protected virtual string PrePropertyName
+        {
+            get
+            {
+                return "";
+            }
+        }
+        protected virtual string NextPropertyName
+        {
+            get
+            {
+                return "";
+            }
+        }
         #endregion
 
 
@@ -390,7 +424,7 @@ namespace LitJson
             }
 
             Unindent ();
-            Put ("]");
+            Put (ArrayEndFlag);
         }
 
         public void WriteArrayStart ()
@@ -398,7 +432,7 @@ namespace LitJson
             DoValidation (Condition.NotAProperty);
             PutNewline ();
 
-            Put ("[");
+            Put (ArrayStartFlag);
 
             context = new WriterContext ();
             context.InArray = true;
@@ -443,7 +477,9 @@ namespace LitJson
             DoValidation (Condition.Property);
             PutNewline ();
 
+            Put(PrePropertyName);
             PutString (property_name);
+            Put(NextPropertyName);
 
             if (pretty_print) {
                 if (property_name.Length > context.Padding)
@@ -453,9 +489,9 @@ namespace LitJson
                      i >= 0; i--)
                     writer.Write (' ');
 
-                writer.Write (": ");
+                writer.Write (PropertyFlag+" ");
             } else
-                writer.Write (':');
+                writer.Write (PropertyFlag);
 
             context.ExpectingValue = true;
         }

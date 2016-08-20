@@ -30,6 +30,7 @@ namespace LitJson
         private IDictionary<string, JsonData> inst_object;
         private string                        inst_string;
         private string                        json;
+        private string                        lua;
         private JsonType                      type;
 
         // Used to implement the IOrderedDictionary interface
@@ -271,7 +272,7 @@ namespace LitJson
 
                 inst_object[prop_name] = value;
 
-                json = null;
+                clearStringCache();
             }
         }
 
@@ -299,7 +300,7 @@ namespace LitJson
                     inst_object[entry.Key] = value;
                 }
 
-                json = null;
+                clearStringCache();
             }
         }
         #endregion
@@ -473,14 +474,14 @@ namespace LitJson
                 new KeyValuePair<string, JsonData> ((string) key, data);
             object_list.Add (entry);
 
-            json = null;
+            clearStringCache();
         }
 
         void IDictionary.Clear ()
         {
             EnsureDictionary ().Clear ();
             object_list.Clear ();
-            json = null;
+            clearStringCache();
         }
 
         bool IDictionary.Contains (object key)
@@ -504,7 +505,7 @@ namespace LitJson
                 }
             }
 
-            json = null;
+            clearStringCache();
         }
         #endregion
 
@@ -567,35 +568,35 @@ namespace LitJson
         {
             type = JsonType.Boolean;
             inst_boolean = val;
-            json = null;
+            clearStringCache();
         }
 
         void IJsonWrapper.SetDouble (double val)
         {
             type = JsonType.Double;
             inst_double = val;
-            json = null;
+            clearStringCache();
         }
 
         void IJsonWrapper.SetInt (int val)
         {
             type = JsonType.Int;
             inst_int = val;
-            json = null;
+            clearStringCache();
         }
 
         void IJsonWrapper.SetLong (long val)
         {
             type = JsonType.Long;
             inst_long = val;
-            json = null;
+            clearStringCache();
         }
 
         void IJsonWrapper.SetString (string val)
         {
             type = JsonType.String;
             inst_string = val;
-            json = null;
+            clearStringCache();
         }
 
         string IJsonWrapper.ToJson ()
@@ -619,7 +620,7 @@ namespace LitJson
         void IList.Clear ()
         {
             EnsureList ().Clear ();
-            json = null;
+            clearStringCache();
         }
 
         bool IList.Contains (object value)
@@ -635,19 +636,19 @@ namespace LitJson
         void IList.Insert (int index, object value)
         {
             EnsureList ().Insert (index, value);
-            json = null;
+            clearStringCache();
         }
 
         void IList.Remove (object value)
         {
             EnsureList ().Remove (value);
-            json = null;
+            clearStringCache();
         }
 
         void IList.RemoveAt (int index)
         {
             EnsureList ().RemoveAt (index);
-            json = null;
+            clearStringCache();
         }
         #endregion
 
@@ -685,6 +686,11 @@ namespace LitJson
 
 
         #region Private Methods
+        private void  clearStringCache()
+        {
+            json = null;
+            lua = null;
+        }
         private ICollection EnsureCollection ()
         {
             if (type == JsonType.Array)
@@ -799,7 +805,7 @@ namespace LitJson
         {
             JsonData data = ToJsonData (value);
 
-            json = null;
+            clearStringCache();
 
             return EnsureList ().Add (data);
         }
@@ -914,6 +920,20 @@ namespace LitJson
             json = sw.ToString ();
 
             return json;
+        }
+        public string ToLua()
+        {
+            if (lua != null)
+                return lua;
+
+            StringWriter sw = new StringWriter();
+            LuaWriter writer = new LuaWriter(sw);
+            writer.Validate = false;
+
+            WriteJson(this, writer);
+            lua = sw.ToString();
+
+            return lua;
         }
 
         public void ToJson (JsonWriter writer)
