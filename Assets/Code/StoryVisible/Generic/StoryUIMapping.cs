@@ -69,6 +69,13 @@ namespace xxstory
                 }
             }
 
+            public int Count
+            {
+                get
+                {
+                    return _mapDatas.Count;
+                }
+            }
             public string GetSubName(GameObject objChild)
             {
                 return StoryUIMapping.GetSubName<Transform>(objChild, panelRoot);
@@ -192,10 +199,18 @@ namespace xxstory
                 writer.WriteObjectEnd();
             }
         }
-
+        
         public Dictionary<GameObject, singlePanelInfo> _panelInfos = new Dictionary<GameObject, singlePanelInfo>();
         public string preDir = "/ScriptConfig/UIReflectConfig/";
         public string saveName;
+
+        public int Count
+        {
+            get
+            {
+                return _panelInfos.Count;
+            }
+        }
         public singlePanelInfo Add(GameObject obj)
         {
             singlePanelInfo panelInfo = null;
@@ -217,6 +232,28 @@ namespace xxstory
             {
                 _panelInfos.Remove(obj);
             }
+        }
+        public singlePanelInfo GetPanelInfo(GameObject key)
+        {
+            if (_panelInfos.ContainsKey(key))
+            {
+                return _panelInfos[key];
+            }
+            return null;
+        }
+        public GameObject[] GetPanelNames(ref string[] names)
+        {
+            int count = _panelInfos.Count;
+            GameObject[] objs = new GameObject[count];
+            names = new string[count];
+            int index = 0;
+            foreach (var panelKey in _panelInfos.Keys)
+            {
+                objs[index] = panelKey;
+                names[index] = panelKey.name;
+                ++index;
+            }
+            return objs;
         }
 
 

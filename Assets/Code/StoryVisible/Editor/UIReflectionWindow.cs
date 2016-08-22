@@ -4,11 +4,34 @@ using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
 using xxstory;
+using WH.Editor;
 
 public class UIReflectionWindow : EditorWindow
 {
+    protected class Styles
+    {
+        public readonly GUIStyle listItem = new GUIStyle("PR Label");
+        public readonly GUIStyle listItemBackground = new GUIStyle("CN EntryBackOdd");
+        public readonly GUIStyle listItemBackground2 = new GUIStyle("CN EntryBackEven");
+        public readonly GUIStyle listBackgroundStyle = new GUIStyle("CN Box");
+        public Styles()
+        {
+            Texture2D background = this.listItem.hover.background;
+            // 开启即失去焦点时，也显示蓝色
+            //this.listItem.onNormal.background = background;
+            this.listItem.onActive.background = background;
+            this.listItem.onFocused.background = background;
+        }
+    }
+    protected static Styles styles;
+    protected ListViewState m_ListView;
 
     #region MENU
+    [MenuItem("Story Export/UI Transition/ReflectionWindow")]
+    private static void Init()
+    {
+        GetWindow(typeof(UIReflectionWindow));
+    }
     [MenuItem("Story Export/UI Transition/Flush Hierarchy Label")]
     private static void OnFlushHierarchyLabel()
     {
@@ -202,7 +225,7 @@ public class UIReflectionWindow : EditorWindow
         }
     }
     #endregion
-
+    #region privateFunc
     private static bool checkSelectionNull()
     {
         Object[] selectObjs = Selection.objects;
@@ -252,13 +275,6 @@ public class UIReflectionWindow : EditorWindow
         sw.Close();
     }
 
-
-
-
-
-
-
-
     //         List<string> folders = new List<string>();
     //         string szSelected;
     //         for (int i = 0; i < selectObjs.Length; i++)
@@ -293,4 +309,138 @@ public class UIReflectionWindow : EditorWindow
     //                 Debug.Log("===sdfs2222=" + filePath);
     //             }
     //         }
+    #endregion
+
+    private bool m_Focus;
+    private bool[] toggles = new bool[5];
+    private string[] strHead = new string[]{"index","component", "require", "funcDesc", "funcKey", "funcValue", "className"};
+    private int[] m_ColWidths = new[] { 100, 100, 100, 100, 100, 100, 100 };
+    private StoryUIMapping mObjMapping;
+    private StoryUIMapping.singlePanelInfo mPanelInfo;
+    private int currentMapIndex;
+    private string[] panelNames = {};
+    private GameObject[] objPanels = {};
+    private bool hasLayoutChanged;
+    private Rect cacheWindowRect;
+    private void OnEnable()
+    {
+        Debug.Log("OnEnabled");
+        styles = new Styles();
+        m_ListView = new ListViewState();
+    }
+    private void OnDisable()
+    {
+        Debug.Log("OnDisable");
+    }
+    private void OnSelectionChange()
+    {
+        GameObject gObject = Selection.activeGameObject;
+        if (gObject == null) return;
+        StoryUIMapping uimapCom = gObject.GetComponent<StoryUIMapping>();
+        if (uimapCom == null) return;
+        mObjMapping = uimapCom;
+        currentMapIndex = 0;
+        this.Repaint();
+    }
+    private void OnInspectorUpdate()
+    {
+        this.Repaint();
+    }
+    private void OnFocus()
+    {
+        m_Focus = true;
+    }
+
+    private void OnLostFocus()
+    {
+        m_Focus = false;
+    }
+
+    GameObject obj;
+    int num = 0;
+    private void OnGUI()
+    {
+        GUILayout.Label("  Options", "LargeLabel");
+        GUILayout.BeginVertical("HelpBox");
+        //Title
+        EditorGUIUtility.labelWidth = 60;
+        GUILayout.BeginHorizontal();
+        EditorGUILayout.TextField("Search", "", "ToolbarSeachTextField", GUILayout.Width(208));
+        GUILayout.Button("Close", "ToolbarSeachCancelButton");
+        GUILayout.EndHorizontal();
+        OnUpdateHead();
+        //Head
+        GUILayout.Space(10);
+        GUILayout.BeginHorizontal();
+        for (int i = 0; i < strHead.Length; ++i)
+        {
+            string styleTitle = "OL Titlemid";
+            if (i == 0) styleTitle = "OL Titleleft";
+            else if (i == strHead.Length - 1) styleTitle = "OL Titleright";
+            if (GUILayout.Button(strHead[i], styleTitle))
+            {
+
+            }
+        }
+        GUILayout.EndHorizontal();
+
+        //content
+        OnUpdateContent();
+
+        GUILayout.EndVertical();
+    }
+    private void OnUpdateHead()
+    {
+        GUILayout.BeginHorizontal();
+        mObjMapping = EditorGUILayout.ObjectField("UI", mObjMapping, typeof(StoryUIMapping), GUILayout.Width(222)) as StoryUIMapping;
+        if (mObjMapping != null)
+        {
+            objPanels = mObjMapping.GetPanelNames(ref panelNames);
+            mPanelInfo = null;
+            GUILayout.Space(10);
+            if (panelNames.Length == 0)
+            {
+                GUILayout.Label("There is no Panel added.. check!");
+            }
+            else
+            {
+                currentMapIndex = EditorGUILayout.Popup(currentMapIndex, panelNames, "MiniPullDown", GUILayout.Width(70));
+                GUILayout.Space(10);
+                GUILayout.Button("AllText", "minibuttonleft");
+                GUILayout.Button("Check", "minibuttonright");
+                mPanelInfo = mObjMapping.GetPanelInfo(objPanels[currentMapIndex]);
+            }
+        }
+        GUILayout.EndHorizontal();
+    }
+    private void OnUpdateContent()
+    {
+        if (mPanelInfo == null) return;
+        m_ListView.totalRows = mPanelInfo.Count;
+        Event current = Event.current;
+        GUILayout.BeginVertical("ProgressBarBack");
+        GUIContent textContent = new GUIContent();
+        foreach (ListViewElement el in ListViewGUI.ListView(m_ListView, m_ColWidths, styles.listBackgroundStyle))
+        {
+            if (current.type == EventType.MouseDown && current.button == 0 && el.position.Contains(current.mousePosition) && current.clickCount == 2)
+            {
+                Debug.Log("点中了" + "行" + el.row + "列" + el.column);
+            }
+            if (current.type == EventType.Repaint)
+            {
+                textContent.text = GetRowText(el);
+
+                // 交替显示不同背景色
+                GUIStyle style = (el.row % 2 != 0) ? styles.listItemBackground2 : styles.listItemBackground;
+                style.Draw(el.position, false, false, m_ListView.row == el.row, false);
+                styles.listItem.Draw(el.position, textContent, false, false, m_ListView.row == el.row, m_Focus);
+            }
+        }
+        EditorGUILayout.EndVertical();
+    }
+    private string GetRowText(ListViewElement el)
+    {
+        return "hesl";
+    }
+    
 }
